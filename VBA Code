@@ -1,0 +1,42 @@
+Sub TestData()
+    Dim ordersdata As Variant
+    Dim cutoffsdata As Variant
+    Dim cutoffsdate As Date
+    Dim departureday As Date
+    Dim ordersrows As Long
+    Dim cutoffsrows As Long
+    Dim i, j As Long
+     
+    Worksheets("Orders").Range("E2:F" & Worksheets("Orders").Cells(Worksheets("Orders").Rows.Count, "F").End(xlUp).Row).ClearContents
+     
+    ordersdata = Worksheets("Orders").Range("A2:F" & Worksheets("Orders").Cells(Worksheets("Orders").Rows.Count, "A").End(xlUp).Row).value
+    cutoffsdata = Worksheets("Cut Offs").Range("A2:D" & Worksheets("Cut Offs").Cells(Worksheets("Cut Offs").Rows.Count, "A").End(xlUp).Row).value
+   
+    ordersrows = UBound(ordersdata, 1)
+    cutoffsrows = UBound(cutoffsdata, 1)
+   
+'    Application.ScreenUpdating = False
+   
+    For i = 1 To ordersrows
+        cutoffsdate = 0
+        departureday = 0
+        For j = 1 To cutoffsrows
+            If cutoffsdata(j, 2) = ordersdata(i, 2) Then
+                 If cutoffsdata(j, 1) = ordersdata(i, 3) And _
+                    cutoffsdata(j, 4) >= ordersdata(i, 4) Then
+                    cutoffsdate = cutoffsdata(j, 4)
+                    departureday = cutoffsdata(j, 3)
+           
+                    ordersdata(i, 5) = IIf(cutoffsdate = 0, "", cutoffsdate)
+                    ordersdata(i, 6) = IIf(departureday = 0, "", departureday)
+                    Exit For
+                 End If
+            End If
+        Next j
+    Next i
+     
+    Worksheets("Orders").Range("E2:F" & ordersrows + 1).value = Application.Index(ordersdata, Evaluate("row(1:" & ordersrows & ")"), Array(5, 6))
+ 
+'    Application.ScreenUpdating = True
+
+End Sub
